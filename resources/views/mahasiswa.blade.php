@@ -55,8 +55,10 @@
                 <option value="">-- Pilih Program Studi --</option>
 
                 @foreach ($daftarProgramStudi as $programStudi)
-                    <option value="{{ $programStudi['id'] }}"
-                        @selected(old('program_studi_id') == $programStudi['id'])>
+                    <option
+                        value="{{ $programStudi['id'] }}"
+                        @selected(old('program_studi_id') == $programStudi['id'])
+                    >
                         {{ $programStudi['nama_prodi'] }}
                     </option>
                 @endforeach
@@ -64,6 +66,35 @@
         </p>
 
         <button type="submit">Tambah Data</button>
+    </form>
+
+    <h2>Pencarian dan Filter</h2>
+
+    <form action="{{ route('mahasiswa.index') }}" method="GET">
+        <p>
+            Kata Kunci<br>
+            <input type="text" name="q" value="{{ $kataKunci }}">
+        </p>
+
+        <p>
+            Program Studi<br>
+            <select name="program_studi_id">
+                <option value="">-- Semua Program Studi --</option>
+
+                @foreach ($daftarProgramStudi as $programStudi)
+                    <option
+                        value="{{ $programStudi['id'] }}"
+                        @selected((string) $programStudiId === (string) $programStudi['id'])
+                    >
+                        {{ $programStudi['nama_prodi'] }}
+                    </option>
+                @endforeach
+            </select>
+        </p>
+
+        <button type="submit">Cari</button>
+
+        <a href="{{ route('mahasiswa.index') }}">Reset</a>
     </form>
 
     <h2>Daftar Mahasiswa</h2>
@@ -75,6 +106,7 @@
             <th>Email</th>
             <th>Usia</th>
             <th>Program Studi</th>
+            <th>Aksi</th>
         </tr>
 
         @forelse ($daftarMahasiswa as $mahasiswa)
@@ -84,12 +116,34 @@
                 <td>{{ $mahasiswa['email'] }}</td>
                 <td>{{ $mahasiswa['usia'] }}</td>
                 <td>{{ $mahasiswa['nama_prodi'] }}</td>
+
+                <td>
+                    <a href="{{ route('mahasiswa.edit', $mahasiswa['id']) }}">
+                        Ubah
+                    </a>
+
+                    <form
+                        action="{{ route('mahasiswa.destroy', $mahasiswa['id']) }}"
+                        method="POST"
+                    >
+                        @csrf
+                        @method('DELETE')
+
+                        <button
+                            type="submit"
+                            onclick="return confirm('Hapus data ini?')"
+                        >
+                            Hapus
+                        </button>
+                    </form>
+                </td>
             </tr>
         @empty
             <tr>
-                <td colspan="5">Data belum tersedia.</td>
+                <td colspan="6">Data tidak ditemukan.</td>
             </tr>
         @endforelse
     </table>
 </body>
 </html>
+```
