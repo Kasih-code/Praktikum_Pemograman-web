@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -64,4 +63,3 @@
     </form>
 </body>
 </html>
-```
