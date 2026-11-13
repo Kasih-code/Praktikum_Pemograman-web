@@ -6,8 +6,10 @@
 </head>
 <body>
     <h1>Detail Buku</h1>
-    <p>Kode: {{ $buku['kode'] }}</p>
-    <p>Judul: {{ $buku['judul'] }}</p>
-    <p><a href="{{ url('/buku') }}">Kembali ke daftar</a></p>
+    <p>Kode: {{ $buku->kode }}</p>
+    <p>Judul: {{ $buku->judul }}</p>
+    <p>Kategori: {{ $buku->kategori->nama }}</p>
+    <p><a href="{{ route('buku.edit', $buku) }}">Ubah</a></p>
+    <p><a href="{{ route('buku.index') }}">Kembali ke daftar</a></p>
 </body>
 </html>
