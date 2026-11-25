@@ -3,32 +3,14 @@
 <head>
     <meta charset="utf-8">
     <title>Daftar Buku</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 15px;
-        }
-
-        h1 {
-            font-size: 24px;
-        }
-
-        table {
-            width: 85%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            border: 1px solid #777;
-            padding: 6px 4px;
-            text-align: left;
-            font-weight: normal;
-        }
-    </style>
 </head>
 <body>
     <h1>Daftar Buku</h1>
+    <p>Masuk sebagai {{ auth()->user()->name }}</p>
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit">Keluar</button>
+    </form>
     <p><a href="{{ route('buku.create') }}">Tambah Buku</a></p>
 
     @if (session('status'))
@@ -53,7 +35,7 @@
                     <td>
                         <a href="{{ route('buku.edit', $buku) }}">Ubah</a>
                         <br>
-                        <form action="{{ route('buku.destroy', $buku) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('buku.destroy', $buku) }}" method="POST">
                             @csrf
                             @method('DELETE')
                             <button type="submit">Hapus</button>
