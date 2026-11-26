@@ -18,7 +18,11 @@ class BukuTest extends TestCase
     {
         parent::setUp();
 
-        $this->actingAs(User::factory()->create());
+        $admin = User::factory()->create();
+        $admin->role = 'admin';
+        $admin->save();
+
+        $this->actingAs($admin);
     }
 
     public function test_buku_index_displays_both_sample_books_in_the_expected_table(): void
@@ -65,18 +69,72 @@ class BukuTest extends TestCase
             ->assertSee('Data buku tidak ditemukan.');
     }
 
-    public function test_buku_detail_displays_bk002(): void
+    public function test_buku_detail_route_is_not_available(): void
     {
-        $this->get('/buku/BK002')
-            ->assertOk()
-            ->assertSee('BK002')
-            ->assertSee('Belajar Laravel')
-            ->assertSee('Pemrograman');
+        $this->get('/buku/BK002')->assertStatus(405);
     }
 
-    public function test_unknown_buku_detail_returns_not_found(): void
+    public function test_reader_can_view_buku_without_write_controls(): void
     {
-        $this->get('/buku/BK999')->assertNotFound();
+        $reader = User::factory()->create()->refresh();
+        $this->assertSame('pembaca', $reader->role);
+
+        $this->actingAs($reader)
+            ->get(route('buku.index'))
+            ->assertOk()
+            ->assertSee('(pembaca)')
+            ->assertDontSee('Tambah Buku')
+            ->assertDontSee('<th>Aksi</th>', false)
+            ->assertDontSee('Ubah');
+    }
+
+    public function test_reader_cannot_open_the_book_creation_form(): void
+    {
+        $reader = User::factory()->create();
+
+        $this->actingAs($reader)
+            ->get(route('buku.create'))
+            ->assertForbidden();
+    }
+
+    public function test_reader_cannot_create_a_book(): void
+    {
+        $reader = User::factory()->create();
+        $kategori = Kategori::where('nama', 'Pemrograman')->firstOrFail();
+
+        $this->actingAs($reader)
+            ->post(route('buku.store'), [
+                'kode' => 'BK005',
+                'judul' => 'Pemrograman Laravel',
+                'kategori_id' => $kategori->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('bukus', ['kode' => 'BK005']);
+    }
+
+    public function test_reader_cannot_edit_update_or_delete_a_book(): void
+    {
+        $reader = User::factory()->create()->refresh();
+        $buku = Buku::where('kode', 'BK001')->firstOrFail();
+
+        $this->actingAs($reader)
+            ->get(route('buku.edit', $buku))
+            ->assertForbidden();
+
+        $this->put(route('buku.update', $buku), [
+            'kode' => 'BK001',
+            'judul' => 'Judul tidak berwenang',
+            'kategori_id' => $buku->kategori_id,
+        ])->assertForbidden();
+
+        $this->delete(route('buku.destroy', $buku))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('bukus', [
+            'id' => $buku->id,
+            'judul' => 'Dasar PHP',
+        ]);
     }
 
     public function test_valid_book_is_created_and_persisted(): void

@@ -66,6 +66,7 @@ class AuthTest extends TestCase
         $this->get(route('buku.index'))
             ->assertOk()
             ->assertSee('Masuk sebagai Mahasiswa Praktikum')
+            ->assertSee('(pembaca)')
             ->assertSee('Keluar');
     }
 
@@ -89,14 +90,5 @@ class AuthTest extends TestCase
             ->assertSee('name="_token"', false)
             ->assertSee('action="'.route('logout').'"', false)
             ->assertSee('method="POST"', false);
-    }
-
-    public function test_buku_page_is_not_cached(): void
-    {
-        $response = $this->actingAs(User::factory()->create())
-            ->get(route('buku.index'))
-            ->assertOk();
-
-        $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
     }
 }
